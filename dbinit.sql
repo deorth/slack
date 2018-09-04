@@ -13,6 +13,7 @@ CREATE TABLE slack_todos(
 CREATE TABLE slack_todos_priorities(
     id INT AUTO_INCREMENT,
     priority VARCHAR(10) NOT NULL,
+    color VARCHAR(7) NOT NULL,
     PRIMARY KEY (id)
 ) ENGINE InnoDB;
 
@@ -24,6 +25,6 @@ INSERT INTO slack_todos
            (5, "UCKDCBLAE", "Goof around on Facebook", 3, false);
 
 INSERT INTO slack_todos_priorities
-    VALUES (1, "high"),
-           (2, "med"),
-           (3, "low");
+    VALUES (1, "high", "#ff0000"),
+           (2, "med", "#0000ff"),
+           (3, "low", "#00ff00");
