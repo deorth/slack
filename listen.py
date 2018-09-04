@@ -5,11 +5,7 @@ import requests
 
 print("Content-Type: text/plain\n")
 
-payload = cgi.FieldStorage()
-myvars = vars(payload)
-mylist = myvars["list"]
-
-request_file = open("request-data", "w")
+mylist = vars(cgi.FieldStorage())["list"]
 
 for x in mylist:
     name = x.name
@@ -27,22 +23,14 @@ for x in mylist:
     if (name == "text"):
         text = value
 
-request_file.write("Command {0} with params {1} was issued by Slack user {2}\n".format(command, text, user_id))
-request_file.write("Respond to url {0}\n".format(response_url))
-
-post_msg = "Thank you for your message. Your command {0} with parameters \"{1}\" was received.\n".format(command, text
-)
+# could theoretically check if any of the expected vars are missing from the payload,
+# but that would mean there's a problem bigger than the scope of my app and it didn't
+# seem too important to handle in this exercise
+        
+post_msg = "Thank you for your message. Your command {0} with parameters \"{1}\" was received.\n".format(command, text)
 
 data = {}
 data["text"] = post_msg
-
-request_file.write(post_msg)
-request_file.write(str(data))
-
-post_data = str(data)
+post_data = str(data).encode("utf-8")
 
 r = requests.post(response_url, data=post_data)
-
-request_file.write("\n{0}\n".format(r.text))
-
-request_file.close()
