@@ -17,13 +17,6 @@ CREATE TABLE slack_todos_priorities(
     PRIMARY KEY (id)
 ) ENGINE InnoDB;
 
-INSERT INTO slack_todos
-    VALUES (1, "UCKDCBLAE", "Write Slack app", 1, false),
-           (2, "UCKDCBLAE", "Write tests", 1, false),
-           (3, "UCKDCBLAE", "Clean up code", 1, false),
-           (4, "UCKDCBLAE", "Eat lunch", 2, false),
-           (5, "UCKDCBLAE", "Goof around on Facebook", 3, false);
-
 INSERT INTO slack_todos_priorities
     VALUES (1, "high", "#ff0000"),
            (2, "med", "#0000ff"),
