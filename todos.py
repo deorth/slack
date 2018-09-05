@@ -2,8 +2,8 @@
 
 import cgi
 import requests
-
-print("Content-Type: text/plain\n")
+import todoslib
+import json
 
 # get payload from slack
 mylist = vars(cgi.FieldStorage())["list"]
@@ -40,12 +40,38 @@ text = cgi.escape(text)
 # handle in this exercise
 
 if (text == ""):
-    post_msg = "Thank you for your message. Your command {0} was received without parameters.\n".format(command)
+
+    # no parameters were passed, let's get incomplete tasks
+    
+    todos = todoslib.get_todos(user_id)
+
+    num_todos = len(todos)
+    if(num_todos == 0):
+        post_msg = "You have no incomplete tasks!\n\nTo get a list of your completed tasks (if you have some), use:\n`/todos all`\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`."
+    else:
+        m = []
+        m.append("{{\"text\": \"You have {0} incomplete tasks:\", \"attachments\": [".format(num_todos))
+        cnt = 0
+            
+        for todo in todos:
+            m.append("{{ \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"type\": \"button\", \"text\": \"{1}\", \"url\": \"http://vasserman.net/slack/todos.py\" }} ] }}".format(todos[todo][0], todos[todo][1]))
+            cnt += 1
+            if (cnt < num_todos):
+                m.append(", ")
+
+        m.append("]}")
+        msg = ''.join(m)
+
+        post_msg = msg.encode("utf-8")
+
 else:
-    post_msg = "Thank you for your message. Your command {0} with parameters \"{1}\" was received.\n".format(command, text)
 
-data = {}
-data["text"] = post_msg
-post_data = str(data).encode("utf-8")
+    # there are some parameters, let's find out what they are
+    if (text == "all"):
+        post_msg = "This is where you'd see all your tasks, complete and incomplete."
+    else:
+        post_msg = "This is where I'd be trying to figure out what parameters are passed if not \"all\"."
+        
+r = requests.post(response_url, data=post_msg)
 
-r = requests.post(response_url, data=post_data)
+print("Content-type: text/plain\n")
