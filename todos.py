@@ -54,7 +54,7 @@ if (text == ""):
         cnt = 0
             
         for todo in todos:
-            m.append("{{ \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"type\": \"button\", \"text\": \"{1}\", \"url\": \"http://vasserman.net/slack/todos.py\" }} ] }}".format(todos[todo][0], todos[todo][1]))
+            m.append("{{ \"callback_id\": \"complete\", \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"name\": \"complete\", \"type\": \"button\", \"text\": \"{1}\", \"value\": \"{2}\" }} ] }}".format(todos[todo][0], todos[todo][1], todo))
             cnt += 1
             if (cnt < num_todos):
                 m.append(", ")
@@ -64,14 +64,40 @@ if (text == ""):
 
         post_msg = msg.encode("utf-8")
 
-else:
+elif (text == "all"):
 
-    # there are some parameters, let's find out what they are
-    if (text == "all"):
-        post_msg = "This is where you'd see all your tasks, complete and incomplete."
+    todos = todoslib.get_all_todos(user_id)
+
+    num_todos = len(todos)
+    if(num_todos == 0):
+        post_msg = "You have no tasks!\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`."
     else:
-        post_msg = "This is where I'd be trying to figure out what parameters are passed if not \"all\"."
+        m = []
+        m.append("{{\"text\": \"You have {0} tasks:\", \"attachments\": [".format(num_todos))
+        cnt = 0
+            
+        for todo in todos:
+            complete = todos[todo][2]
+            if (complete == 1):
+                check = ":white_check_mark:"
+                name = "incomplete"
+            else:
+                check = ":white_square:"
+                name = "complete"
+
+            m.append("{{ \"callback_id\": \"complete\", \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"name\": \"{4}\", \"type\": \"button\", \"text\": \"{3} {1}\", \"value\": \"{2}\" }} ] }}".format(todos[todo][0], todos[todo][1], todo, check, name))
+            cnt += 1
+            if (cnt < num_todos):
+                m.append(", ")
+
+        m.append("]}")
+        msg = ''.join(m)
+
+        post_msg = msg.encode("utf-8")
+else:
+    post_msg = "This is where I'd be trying to figure out what parameters are passed if not \"all\"."
         
 r = requests.post(response_url, data=post_msg)
 
 print("Content-type: text/plain\n")
+# print(r.text)
