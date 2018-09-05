@@ -13,6 +13,7 @@ user_id = ""
 response_url = ""
 command = ""
 text = ""
+callback_id = ""
 
 for x in mylist:
     name = x.name
@@ -29,6 +30,9 @@ for x in mylist:
 
     if (name == "text"):
         text = value
+
+    if (name == "callback_id"):
+        callback_id = value
 
 # escape special characters
 
@@ -54,7 +58,7 @@ if (text == ""):
         cnt = 0
             
         for todo in todos:
-            m.append("{{ \"callback_id\": \"complete\", \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"name\": \"complete\", \"type\": \"button\", \"text\": \"{1}\", \"value\": \"{2}\" }} ] }}".format(todos[todo][0], todos[todo][1], todo))
+            m.append("{{ \"callback_id\": \"complete\", \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"name\": \"complete\", \"type\": \"button\", \"text\": \"{1}\", \"value\": \"{2}\", \"confirm\": {{ \"title\": \"Mark task complete?\", \"text\": \"Are you sure you want to mark this task as complete?\", \"ok_text\": \"Yes\" }} }} ] }}".format(todos[todo][0], todos[todo][1], todo))
             cnt += 1
             if (cnt < num_todos):
                 m.append(", ")
@@ -85,7 +89,7 @@ elif (text == "all"):
                 check = ":white_square:"
                 name = "complete"
 
-            m.append("{{ \"callback_id\": \"complete\", \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"name\": \"{4}\", \"type\": \"button\", \"text\": \"{3} {1}\", \"value\": \"{2}\" }} ] }}".format(todos[todo][0], todos[todo][1], todo, check, name))
+            m.append("{{ \"callback_id\": \"complete\", \"fallback\": \"{1}\", \"color\": \"{0}\", \"actions\": [ {{ \"name\": \"{4}\", \"type\": \"button\", \"text\": \"{3} {1}\", \"value\": \"{2}\", \"confirm\": {{ \"title\": \"Mark task {4}?\", \"text\": \"Are you sure you want to mark this task as {4}?\", \"ok_text\": \"Yes\" }} }} ] }}".format(todos[todo][0], todos[todo][1], todo, check, name))
             cnt += 1
             if (cnt < num_todos):
                 m.append(", ")
