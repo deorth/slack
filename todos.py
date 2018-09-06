@@ -2,8 +2,9 @@
 
 import cgi
 import requests
-import todoslib
 import json
+import re
+import todoslib
 
 # get payload from slack
 mylist = vars(cgi.FieldStorage())["list"]
@@ -50,7 +51,7 @@ if (text == ""):
     todos = todoslib.get_todos(user_id)
 
     num_todos = len(todos)
-    if(num_todos == 0):
+    if (num_todos == 0):
         post_msg = "You have no incomplete tasks!\n\nTo get a list of your completed tasks (if you have some), use:\n`/todos all`\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`."
     else:
         m = []
@@ -73,7 +74,7 @@ elif (text == "all"):
     todos = todoslib.get_all_todos(user_id)
 
     num_todos = len(todos)
-    if(num_todos == 0):
+    if (num_todos == 0):
         post_msg = "You have no tasks!\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`."
     else:
         m = []
@@ -99,9 +100,28 @@ elif (text == "all"):
 
         post_msg = msg.encode("utf-8")
 else:
-    post_msg = "This is where I'd be trying to figure out what parameters are passed if not \"all\"."
-        
+
+    # figure out what parameters were passed
+
+    param_search = re.search(r'add(.*)', text, re.I)
+    if (param_search):
+        params = param_search.group(1)
+
+        priority = "med"
+
+        param_search2 = re.search(r'(.*)#(.*)', params, re.I)
+        if (param_search2):
+            task = param_search2.group(1)
+            task = task.strip()
+            priority = param_search2.group(2).strip()
+        else:
+            task = params.strip()
+
+        post_msg = todoslib.add_todo(user_id, task, priority)
+
+    else:
+        post_msg = "{\"text\": \"ERROR: Command parameters are invalid.\"}"
+
 r = requests.post(response_url, data=post_msg)
 
 print("Content-type: text/plain\n")
-# print(r.text)
