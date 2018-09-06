@@ -1,5 +1,6 @@
-#!/home/d3l1r1um/opt/python-3.6.6/bin/python3
+#!/usr/bin/env python
 
+import html
 import cgi
 import requests
 import json
@@ -35,10 +36,7 @@ for x in mylist:
     if (name == "callback_id"):
         callback_id = value
 
-# escape special characters
 
-text = cgi.escape(text)
-        
 # could theoretically check if any of the other expected vars are
 # missing from the payload, but that would mean there's a problem
 # bigger than the scope of my app and it didn't seem too important to
@@ -52,10 +50,14 @@ if (text == ""):
 
     num_todos = len(todos)
     if (num_todos == 0):
-        post_msg = "You have no incomplete tasks!\n\nTo get a list of your completed tasks (if you have some), use:\n`/todos all`\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`."
+        post_msg = "{\"text\": \"You have no incomplete tasks!\n\nTo get a list of your completed tasks (if you have some), use:\n`/todos all`\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`.\"}"
     else:
+        plural = "tasks"
+        if (num_todos == 1):
+            plural = "task"
+
         m = []
-        m.append("{{\"text\": \"You have {0} incomplete tasks:\", \"attachments\": [".format(num_todos))
+        m.append("{{\"text\": \"You have {0} incomplete {1}:\", \"attachments\": [".format(num_todos, plural))
         cnt = 0
             
         for todo in todos:
@@ -66,8 +68,7 @@ if (text == ""):
 
         m.append("]}")
         msg = ''.join(m)
-
-        post_msg = msg.encode("utf-8")
+        post_msg = msg
 
 elif (text == "all"):
 
@@ -75,10 +76,14 @@ elif (text == "all"):
 
     num_todos = len(todos)
     if (num_todos == 0):
-        post_msg = "You have no tasks!\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`."
+        post_msg = "{\"text\": \"You have no tasks!\n\nTo add a new task, use:\n`/todos add <your task description> #priority`\nPriority is optional, and default priority is `med`. Valid priority values are `high`, `med`, and `low`.\"}"
     else:
+        plural = "tasks"
+        if (num_todos == 1):
+            plural = "task"
+
         m = []
-        m.append("{{\"text\": \"You have {0} tasks:\", \"attachments\": [".format(num_todos))
+        m.append("{{\"text\": \"You have {0} {1}:\", \"attachments\": [".format(num_todos, plural))
         cnt = 0
             
         for todo in todos:
@@ -97,14 +102,16 @@ elif (text == "all"):
 
         m.append("]}")
         msg = ''.join(m)
+        post_msg = msg
 
-        post_msg = msg.encode("utf-8")
 else:
 
     # figure out what parameters were passed
 
     param_search = re.search(r'add(.*)', text, re.I)
     if (param_search):
+
+        # params start with add
         params = param_search.group(1)
 
         priority = "med"
@@ -114,13 +121,19 @@ else:
             task = param_search2.group(1)
             task = task.strip()
             priority = param_search2.group(2).strip()
+            if not task:
+                post_msg = "{\"text\": \":bomb: Can't add an empty task.\"}"
+            else:
+                post_msg = todoslib.add_todo(user_id, task, priority)
         else:
             task = params.strip()
-
-        post_msg = todoslib.add_todo(user_id, task, priority)
+            if not task:
+                post_msg = "{\"text\": \":bomb: Can't add an empty task.\"}"
+            else:
+                post_msg = todoslib.add_todo(user_id, task, priority)
 
     else:
-        post_msg = "{\"text\": \"ERROR: Command parameters are invalid.\"}"
+        post_msg = "{\"text\": \":bomb: Command parameters are invalid.\"}"
 
 r = requests.post(response_url, data=post_msg)
 

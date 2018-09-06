@@ -1,4 +1,4 @@
-#!/home/d3l1r1um/opt/python-3.6.6/bin/python3
+#!/usr/bin/env python
 
 import cgi
 import requests
@@ -20,13 +20,7 @@ else:
     complete = 1
 
 post_msg = todoslib.complete_todo(todo_id, user_id, complete)
-print(post_msg)
 
 r = requests.post(response_url, data=post_msg)
 
 print("Content-type: text/plain\n")
-
-# print(r.text)
-# print(post_msg)
-
-

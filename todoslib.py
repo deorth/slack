@@ -1,4 +1,4 @@
-#!/home/d3l1r1um/opt/python-3.6.6/bin/python3
+#!/usr/bin/env python
 
 import MySQLdb
 
@@ -63,18 +63,23 @@ def complete_todo(todo_id, user_id, complete):
         cur.execute("UPDATE slack_todos SET complete = 1 where id=%s and user_id=%s", (todo_id, user_id))
 
         if (cur.rowcount == 0):
-            result = "{\"text\": \":shit: Something went wrong! No matching task found.\", \"replace_original\": false}"
+            result = "{\"text\": \":bomb: Something went wrong! No matching task found.\", \"replace_original\": false}"
         else:
-            result = "{\"text\": \":boom: Task complete!\", \"replace_original\": false}"
+            cur.execute("SELECT todo FROM slack_todos where id=%s", [todo_id])
+            task = cur.fetchone()[0]
+            result = "{{\"text\": \":boom: Task completed: {0}\", \"replace_original\": false}}".format(task)
 
     else:
     
         cur.execute("UPDATE slack_todos SET complete = 0 where id=%s and user_id=%s", (todo_id, user_id))
 
         if (cur.rowcount == 0):
-            result = "{\"text\": \":shit: Something went wrong! No matching task found.\", \"replace_original\": false}"
+            result = "{\"text\": \":bomb: Something went wrong! No matching task found.\", \"replace_original\": false}"
         else:
-            result = "{\"text\": \":confounded: Task marked incomplete...\", \"replace_original\": false}"
+            cur.execute("SELECT todo FROM slack_todos where id=%s", [todo_id])
+            task = cur.fetchone()[0]
+            result = "{{\"text\": \":boom: Task completed: {0}\", \"replace_original\": false}}".format(task)
+            result = "{{\"text\": \":confounded: Task marked incomplete: {0}\", \"replace_original\": false}}".format(task)
             
     db.commit()
     db.close()
@@ -96,17 +101,21 @@ def add_todo(user_id, text, priority):
 
     cur.execute("SELECT id FROM slack_todos_priorities where priority = %s", [priority])
     if (cur.rowcount == 0):
-        result = "{{\"text\": \"ERROR: Priority #{0} is not a valid priority value. Valid priorities are `#high`, `#med`, and `#low`.\"}}".format(priority)
+        result = "{{\"text\": \":bomb: Priority #{0} is not a valid priority value. Valid priorities are `high`, `med`, and `low`.\"}}".format(priority)
     else:
         priority_id = cur.fetchone()[0]
 
         cur.execute("SELECT count(*), id from slack_todos where lower(todo)=%s and user_id=%s and complete=0", (text.lower(), user_id))
         existing_todo = cur.fetchone()
         if (existing_todo[0] != 0):
+
             # this task is a duplicate (it might have a different priority)
             # duplicate tasks are allowed if all existing ones are completed
+            # you can end up with multiple identical open tasks if you mark
+            # old task incomplete after adding a new one
+            
             dupe_id = existing_todo[1] # not using for now, but keeping around just in case
-            result = "{\"text\": \"ERROR: The same task is already on your to-do list!\"}"
+            result = "{\"text\": \":bomb: The same task is already on your to-do list!\"}"
         else:
             # this task is not a duplicate
             cur.execute("INSERT INTO slack_todos (user_id, todo, priority, complete) VALUES (%s, %s,%s,%s)",(user_id, text, priority_id, 0))
