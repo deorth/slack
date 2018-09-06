@@ -30,6 +30,8 @@ Supported commands:
   * `#priority` is optional and defaults to `#med`
   * valid priority values are `#high`, `#med`, and `#low` (don't forget the #!)
 
+The application should always reply privately, even if the slash command is issued in a public channel.
+
 Dev notes:
 
 * The biggest issue that would keep this app from being actually usable is its lack of constraints on the number of tasks (and therefore, number of message attachments) it displays. Ideally, it would limit the number of displayed tasks to 10 (though Slack's advised limit is 20) and then offer some sort of pagination ability to view 10 more, etc.
