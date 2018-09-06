@@ -13,7 +13,7 @@ The application consists of 3 required files:
 
 Two SQL files are also provided.
 
-* [`dbinit.sql`](dbinit.sql) initializes and populates the required MySQL tables
+* [`dbinit.sql`](dbinit.sql) initializes and populates the required MySQL tables. **It will drop the `slack_todos` table, removing all existing tasks!**
 * [`test-data.sql`](test-data.sql) adds some test tasks to the database (replace `SLACK_USER_ID` with your Slack user ID before running!)
 
 To set up the environment:
@@ -27,7 +27,7 @@ Supported commands:
 * `/todos` shows your incomplete tasks
 * `/todos all` shows your complete and incomplete tasks
 * `/todos add _task description_ #priority` adds a new task
-  * `#priority` is optional and defaults to `medium`
+  * `#priority` is optional and defaults to `#med`
   * valid priority values are `#high`, `#med`, and `#low` (don't forget the #!)
 
 Dev notes:
