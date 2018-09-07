@@ -1,4 +1,4 @@
-# Slack ToDoS App
+# Slack ToDos App
 
 Application requirements (tested with):
 * Python 3.6.6 (add'l module required: requests)
@@ -32,6 +32,6 @@ Supported commands:
 
 The application should always reply privately, even if the slash command is issued in a public channel.
 
-Dev notes:
+Dev note:
 
 * The biggest issue that would keep this app from being actually usable is its lack of constraints on the number of tasks (and therefore, number of message attachments) it displays. Ideally, it would limit the number of displayed tasks to 10 (though Slack's advised limit is 20) and then offer some sort of pagination ability to view 10 more, etc.
